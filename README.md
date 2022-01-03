@@ -1,3 +1,5 @@
+This fork was created to allow apriltag to be built on windows using pthreads4win.
+
 AprilTag 3
 ==========
 AprilTag is a visual fiducial system popular in robotics research. This repository contains the most recent version of AprilTag, AprilTag 3, which includes a faster (>2x) detector, improved detection rate on small tags, flexible tag layouts, and pose estimation. AprilTag consists of a small C library with minimal dependencies.
@@ -24,6 +26,15 @@ Usage
 
 Install
 =======
+
+Building on windows, CMake and NMake need to be installed, download [pthreads4w](https://sourceforge.net/projects/pthreads4w/)@3.0.0 and unzip.
+
+    $ mkdir build && cd build
+    $ cmake -DPTHREADS4W_DIR=<path to pthreads4w> \
+            [-DNMAKE_COMMAND=<nmake.exe if not in path>] \ 
+            [-DBUILD_SHARED_LIBS=<ON | OFF for shared or static>] \
+            ..
+    $ cmake --build . --config Release --target apriltag
 
  Officially only linux operating systems are supported, although users have had success installing on windows too.
  
