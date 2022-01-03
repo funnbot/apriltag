@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.2)
+cmake_minimum_required(VERSION 3.18)
 project(apriltag VERSION 3.1.0 LANGUAGES C CXX)
 
 if(POLICY CMP0077)
@@ -25,29 +25,37 @@ add_library(${PROJECT_NAME} ${APRILTAG_SRCS} ${COMMON_SRC} ${TAG_FILES})
 
 if (MSVC)
     # FindThreads will not find pthread.h with MSVC
+    # Keep this for compatability, not sure of purpose in main repo
+    find_library(PTHREAD_LIBRARIES NAMES pthreads)
     # winmm is necessary for __imp_timeGetTime
-    if (PTHREADS4W_DIR)
-        if (NOT NMAKE_COMMAND)
-            set(NMAKE_COMMAND "nmake")
+    target_link_libraries(${PROJECT_NAME} PUBLIC winmm)
+
+    if (NOT PTHREAD_LIBRARIES)
+        set(NMAKE_COMMAND "nmake" CACHE FILEPATH "Path to nmake.exe")
+        
+        if (NOT PTHREADS4W_DIR)
+            message("-- Downloading pthreads4win from https://sourceforge.net/projects/pthreads4w")
+            file(DOWNLOAD "https://sourceforge.net/projects/pthreads4w/files/pthreads4w-code-v3.0.0.zip/download" "pthreads4w.zip" TLS_VERIFY ON STATUS P4W_STATUS)
+            if (NOT P4W_STATUS EQUAL "0") 
+                message(FATAL_ERROR "Failed to download pthread4win")
+            endif()
+
+            file(ARCHIVE_EXTRACT INPUT "pthreads4w.zip" DESTINATION "pthreads4w")
+            set(PTHREADS4W_DIR "pthreads4w/pthreads4w-code-07053a521b0a9deb6db2a649cde1f828f2eb1f4f" CACHE PATH "Directory of pthreads4win" FORCE) 
         endif()
 
-        set(PTHREADS4W_DIR "" CACHE PATH "Directory of pthreads4win")
-
-        message("Using pthreads4w at ${PTHREADS4W_DIR}")
-
         add_custom_command(TARGET ${PROJECT_NAME} PRE_BUILD
-            COMMAND ${NMAKE_COMMAND} clean VC
-            WORKING_DIRECTORY ${PTHREADS4W_DIR}
-            BYPRODUCTS ${PTHREADS4W_DIR}/pthreadVC3.lib
+            COMMAND ${NMAKE_COMMAND} /C VC
+            WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/${PTHREADS4W_DIR}"
             VERBATIM)
         
-        set(PTHREAD_LIBRARIES "${PTHREADS4W_DIR}/pthreadVC3")
-        target_include_directories(${PROJECT_NAME} PUBLIC ${PTHREADS4W_DIR})
-    else()
-        find_library(PTHREAD_LIBRARIES NAMES pthreads)
+        target_include_directories(${PROJECT_NAME} PUBLIC 
+            "$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/${PTHREADS4W_DIR}/>"
+            "$<INSTALL_INTERFACE:${PTHREADS4W_DIR}/>")
+        target_link_libraries(${PROJECT_NAME} PUBLIC "${CMAKE_CURRENT_BINARY_DIR}/${PTHREADS4W_DIR}/pthreadVC3.lib")
+    else()    
+        target_link_libraries(${PROJECT_NAME} ${PTHREAD_LIBRARIES})
     endif()
-
-    target_link_libraries(${PROJECT_NAME} ${PTHREAD_LIBRARIES} winmm)
 else()
     find_package(Threads REQUIRED)
     target_link_libraries(${PROJECT_NAME} PUBLIC Threads::Threads m)
