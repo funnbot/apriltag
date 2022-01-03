@@ -27,13 +27,10 @@ Usage
 Install
 =======
 
-Building on windows, CMake and NMake need to be installed, download [pthreads4w](https://sourceforge.net/projects/pthreads4w/)@3.0.0 and unzip.
+Building on windows, CMake and NMake need to be installed.
 
     $ mkdir build && cd build
-    $ cmake -DPTHREADS4W_DIR=<path to pthreads4w> \
-            [-DNMAKE_COMMAND=<nmake.exe if not in path>] \ 
-            [-DBUILD_SHARED_LIBS=<ON | OFF for shared or static>] \
-            ..
+    $ cmake ..
     $ cmake --build . --config Release --target apriltag
 
  Officially only linux operating systems are supported, although users have had success installing on windows too.
