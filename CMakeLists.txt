@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.1)
+cmake_minimum_required(VERSION 3.2)
 project(apriltag VERSION 3.1.0 LANGUAGES C CXX)
 
 if(POLICY CMP0077)
@@ -26,7 +26,27 @@ add_library(${PROJECT_NAME} ${APRILTAG_SRCS} ${COMMON_SRC} ${TAG_FILES})
 if (MSVC)
     # FindThreads will not find pthread.h with MSVC
     # winmm is necessary for __imp_timeGetTime
-    find_library(PTHREAD_LIBRARIES NAMES pthreads)
+    if (PTHREADS4W_DIR)
+        if (NOT NMAKE_COMMAND)
+            set(NMAKE_COMMAND "nmake")
+        endif()
+
+        set(PTHREADS4W_DIR "" CACHE PATH "Directory of pthreads4win")
+
+        message("Using pthreads4w at ${PTHREADS4W_DIR}")
+
+        add_custom_command(TARGET ${PROJECT_NAME} PRE_BUILD
+            COMMAND ${NMAKE_COMMAND} clean VC
+            WORKING_DIRECTORY ${PTHREADS4W_DIR}
+            BYPRODUCTS ${PTHREADS4W_DIR}/pthreadVC3.lib
+            VERBATIM)
+        
+        set(PTHREAD_LIBRARIES "${PTHREADS4W_DIR}/pthreadVC3")
+        target_include_directories(${PROJECT_NAME} PUBLIC ${PTHREADS4W_DIR})
+    else()
+        find_library(PTHREAD_LIBRARIES NAMES pthreads)
+    endif()
+
     target_link_libraries(${PROJECT_NAME} ${PTHREAD_LIBRARIES} winmm)
 else()
     find_package(Threads REQUIRED)
