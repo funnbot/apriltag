@@ -45,14 +45,14 @@ if (MSVC)
         endif()
 
         add_custom_command(TARGET ${PROJECT_NAME} PRE_BUILD
-            COMMAND ${NMAKE_COMMAND} /C VC
+            COMMAND ${NMAKE_COMMAND} /C VC-static
             WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/${PTHREADS4W_DIR}"
             VERBATIM)
         
         target_include_directories(${PROJECT_NAME} PUBLIC 
             "$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/${PTHREADS4W_DIR}/>"
             "$<INSTALL_INTERFACE:${PTHREADS4W_DIR}/>")
-        target_link_libraries(${PROJECT_NAME} PUBLIC "${CMAKE_CURRENT_BINARY_DIR}/${PTHREADS4W_DIR}/pthreadVC3.lib")
+        target_link_libraries(${PROJECT_NAME} PUBLIC "${CMAKE_CURRENT_BINARY_DIR}/${PTHREADS4W_DIR}/libpthreadVC3.lib")
     else()    
         target_link_libraries(${PROJECT_NAME} ${PTHREAD_LIBRARIES})
     endif()
