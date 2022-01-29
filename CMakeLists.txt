@@ -1,17 +1,19 @@
-cmake_minimum_required(VERSION 3.18)
+cmake_minimum_required(VERSION 3.1)
 project(apriltag VERSION 3.1.0 LANGUAGES C CXX)
 
 if(POLICY CMP0077)
     cmake_policy(SET CMP0077 NEW)
 endif()
+
 option(BUILD_SHARED_LIBS "Build shared libraries" ON)
+option(BUILD_PYTHON_WRAPPER "Build the python wrapper" ON)
+option(BUILD_OPENCV_EXAMPLES "Build the opencv examples" ON)
 
 # Set a default build type if none was specified
-set(default_build_type "Release")
-
 if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
+    set(default_build_type "Release")
     message(STATUS "Setting build type to '${default_build_type}' as none was specified.")
-    set(CMAKE_BUILD_TYPE "${default_build_type}" CACHE  STRING "Choose the type of build." FORCE)
+    set(CMAKE_BUILD_TYPE "${default_build_type}" CACHE STRING "Choose the type of build." FORCE)
     # Set the possible values of build type for cmake-gui
     set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS  "Debug" "Release" "MinSizeRel" "RelWithDebInfo")
 endif()
@@ -20,42 +22,13 @@ aux_source_directory(common COMMON_SRC)
 set(APRILTAG_SRCS apriltag.c apriltag_pose.c apriltag_quad_thresh.c)
 
 # Library
-file(GLOB TAG_FILES ${PROJECT_SOURCE_DIR}/tag*.c)
+file(GLOB TAG_FILES ${CMAKE_SOURCE_DIR}/tag*.c)
 add_library(${PROJECT_NAME} ${APRILTAG_SRCS} ${COMMON_SRC} ${TAG_FILES})
-
 if (MSVC)
     # FindThreads will not find pthread.h with MSVC
-    # Keep this for compatability, not sure of purpose in main repo
-    find_library(PTHREAD_LIBRARIES NAMES pthreads)
     # winmm is necessary for __imp_timeGetTime
-    target_link_libraries(${PROJECT_NAME} PUBLIC winmm)
-
-    if (NOT PTHREAD_LIBRARIES)
-        set(NMAKE_COMMAND "nmake" CACHE FILEPATH "Path to nmake.exe")
-        
-        if (NOT PTHREADS4W_DIR)
-            message("-- Downloading pthreads4win from https://sourceforge.net/projects/pthreads4w")
-            file(DOWNLOAD "https://sourceforge.net/projects/pthreads4w/files/pthreads4w-code-v3.0.0.zip/download" "pthreads4w.zip" TLS_VERIFY ON STATUS P4W_STATUS)
-            if (NOT P4W_STATUS EQUAL "0") 
-                message(FATAL_ERROR "Failed to download pthread4win")
-            endif()
-
-            file(ARCHIVE_EXTRACT INPUT "pthreads4w.zip" DESTINATION "pthreads4w")
-            set(PTHREADS4W_DIR "pthreads4w/pthreads4w-code-07053a521b0a9deb6db2a649cde1f828f2eb1f4f" CACHE PATH "Directory of pthreads4win" FORCE) 
-        endif()
-
-        add_custom_command(TARGET ${PROJECT_NAME} PRE_BUILD
-            COMMAND ${NMAKE_COMMAND} /C VC-static
-            WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/${PTHREADS4W_DIR}"
-            VERBATIM)
-        
-        target_include_directories(${PROJECT_NAME} PUBLIC 
-            "$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/${PTHREADS4W_DIR}/>"
-            "$<INSTALL_INTERFACE:${PTHREADS4W_DIR}/>")
-        target_link_libraries(${PROJECT_NAME} PUBLIC "${CMAKE_CURRENT_BINARY_DIR}/${PTHREADS4W_DIR}/libpthreadVC3.lib")
-    else()    
-        target_link_libraries(${PROJECT_NAME} ${PTHREAD_LIBRARIES})
-    endif()
+    #find_library(PTHREAD_LIBRARIES NAMES pthreads)
+    #target_link_libraries(${PROJECT_NAME} ${PTHREAD_LIBRARIES} winmm)
 else()
     find_package(Threads REQUIRED)
     target_link_libraries(${PROJECT_NAME} PUBLIC Threads::Threads m)
@@ -64,7 +37,7 @@ endif()
 set_target_properties(${PROJECT_NAME} PROPERTIES SOVERSION 3 VERSION ${PROJECT_VERSION})
 set_target_properties(${PROJECT_NAME} PROPERTIES DEBUG_POSTFIX "d")
 
-include(GNUInstallDirs)
+#include(GNUInstallDirs)
 target_include_directories(${PROJECT_NAME} PUBLIC
     "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/>"
     "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>"
@@ -163,11 +136,16 @@ if (NOT Python3_NOT_FOUND AND NOT Numpy_NOT_FOUND AND PYTHONLIBS_FOUND AND BUILD
     add_custom_target(apriltag_python ALL
         DEPENDS apriltag${PY_EXT_SUFFIX})
 
-execute_process(COMMAND python3 -m site --user-site OUTPUT_VARIABLE PY_DEST)
-string(STRIP ${PY_DEST} PY_DEST)
-install(FILES ${PROJECT_BINARY_DIR}/apriltag${PY_EXT_SUFFIX} DESTINATION ${PY_DEST})
+    execute_process(COMMAND python3 -m site --user-site OUTPUT_VARIABLE PY_DEST)
+    string(STRIP ${PY_DEST} PY_DEST)
+    install(FILES ${PROJECT_BINARY_DIR}/apriltag${PY_EXT_SUFFIX} DESTINATION ${PY_DEST})
 endif (NOT Python3_NOT_FOUND AND NOT Numpy_NOT_FOUND AND PYTHONLIBS_FOUND AND BUILD_PYTHON_WRAPPER)
 
+if (BUILD_APRIL_TAG_EXAMPLES )
+    # Examples
+    # apriltag_demo
+    add_executable(apriltag_demo example/apriltag_demo.c)
+    target_link_libraries(apriltag_demo ${PROJECT_NAME})
 
 # Examples
 # apriltag_demo
