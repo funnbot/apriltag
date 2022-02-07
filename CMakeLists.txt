@@ -125,7 +125,7 @@ install(EXPORT ${targets_export_name}
     DESTINATION "${config_install_dir}")
 
 # export from build/ for external projects to include()
-export(TARGETS apriltag
+export(TARGETS ${PROJECT_NAME}
     NAMESPACE apriltag::
     FILE ${generated_dir}/${targets_export_name}.cmake)
 
