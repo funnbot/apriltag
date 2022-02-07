@@ -8,24 +8,9 @@ endif()
 option(BUILD_SHARED_LIBS "Build shared libraries" ON)
 option(ASAN "Use AddressSanitizer for debug builds to detect memory issues" OFF)
 
-if (ASAN)
-    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} \
-        -fsanitize=address \
-        -fsanitize=bool \
-        -fsanitize=bounds \
-        -fsanitize=enum \
-        -fsanitize=float-cast-overflow \
-        -fsanitize=float-divide-by-zero \
-        -fsanitize=nonnull-attribute \
-        -fsanitize=returns-nonnull-attribute \
-        -fsanitize=signed-integer-overflow \
-        -fsanitize=undefined \
-        -fsanitize=vla-bound \
-        -fno-sanitize=alignment \
-        -fsanitize=leak \
-        -fsanitize=object-size \
-    ")
-endif()
+include(CMakeDependentOption)
+cmake_dependent_option(BUILD_PYTHON_WRAPPER "Build the python wrapper" ON "BUILD_SHARED_LIBS" OFF)
+cmake_dependent_option(BUILD_EXAMPLES "Build the examples" ON "BUILD_SHARED_LIBS" OFF)
 
 # Set a default build type if none was specified
 set(default_build_type "Release")
@@ -70,6 +55,34 @@ foreach(HEADER ${HEADER_FILES})
     string(REGEX MATCH "(.*)[/\\]" DIR ${HEADER})
     install(FILES ${HEADER} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME}/${DIR})
 endforeach()
+
+# AddressSanitizer
+if(ASAN)
+    if(MSVC)
+        set(ASAN_OPTS /fsanitize=address)
+    else()
+        set(ASAN_OPTS
+            -fsanitize=bool
+            -fsanitize=bounds
+            -fsanitize=enum
+            -fsanitize=float-cast-overflow
+            -fsanitize=float-divide-by-zero
+            -fsanitize=nonnull-attribute
+            -fsanitize=returns-nonnull-attribute
+            -fsanitize=signed-integer-overflow
+            -fsanitize=undefined
+            -fsanitize=vla-bound
+            -fno-sanitize=alignment
+            -fsanitize=leak
+            -fsanitize=object-size)
+    endif()
+    target_compile_options(${PROJECT_NAME} PRIVATE "$<$<CONFIG:Debug>:${ASAN_OPTS}>")
+endif()
+
+# Parallel build
+if(MSVC)
+    target_compile_options(${PROJECT_NAME} PRIVATE "/MP")
+endif()
 
 # export library
 set(generated_dir "${CMAKE_CURRENT_BINARY_DIR}/generated")
@@ -125,9 +138,6 @@ if(UNIX)
 endif(UNIX)
 
 # Python wrapper
-include(CMakeDependentOption)
-cmake_dependent_option(BUILD_PYTHON_WRAPPER "Build the python wrapper" ON "BUILD_SHARED_LIBS" OFF)
-
 if(BUILD_PYTHON_WRAPPER)
     SET(Python_ADDITIONAL_VERSIONS 3)
     find_package(PythonLibs)
@@ -164,8 +174,6 @@ if (NOT Python3_NOT_FOUND AND NOT Numpy_NOT_FOUND AND PYTHONLIBS_FOUND AND BUILD
 endif(NOT Python3_NOT_FOUND AND NOT Numpy_NOT_FOUND AND PYTHONLIBS_FOUND AND BUILD_PYTHON_WRAPPER)
 
 # Examples
-cmake_dependent_option(BUILD_EXAMPLES "Build the examples" ON "BUILD_SHARED_LIBS" OFF)
-
 if(BUILD_EXAMPLES)
     # apriltag_demo
     add_executable(apriltag_demo example/apriltag_demo.c)
