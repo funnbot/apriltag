@@ -1,3 +1,5 @@
+This fork was created to allow apriltag to be built on windows.
+
 AprilTag 3
 ==========
 AprilTag is a visual fiducial system popular in robotics research. This repository contains the most recent version of AprilTag, AprilTag 3, which includes a faster (>2x) detector, improved detection rate on small tags, flexible tag layouts, and pose estimation. AprilTag consists of a small C library with minimal dependencies.
@@ -24,10 +26,18 @@ Usage
 
 Install
 =======
+Officially only linux operating systems are supported, although users have had success installing on windows too.
 
-Officially only Linux operating systems are supported, although users have had success installing on Windows too.
+## Windows
+Building on windows, using visual studio's command line or its vcvarsall.bat
+The default installation will be C:\Program Files (x86)\apriltag which requires admin rights. 
+```
+cmake -B build -DCMAKE_INSTALL_PREFIX=path/to/install/apriltag
+cmake --build build --target install --config Release
+```
 
-The default installation will place headers in /usr/local/include and shared library in /usr/local/lib. It also installs a pkg-config script into /usr/local/lib/pkgconfig and will install a python wrapper if python3 is installed.
+## Linux
+On linux, The default installation will place headers in /usr/local/include and shared library in /usr/local/lib. It also installs a pkg-config script into /usr/local/lib/pkgconfig and will install a python wrapper if python3 is installed.
 
 ## cmake
 If you have CMake installed, then do:

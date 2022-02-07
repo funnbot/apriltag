@@ -59,6 +59,8 @@ either expressed or implied, of the Regents of The University of Michigan.
 #endif
 
 #ifdef _WIN32
+int64_t qpc_freq = 1;
+
 static inline void srandom(unsigned int seed)
 {
         srand(seed);
@@ -368,7 +370,17 @@ apriltag_detector_t *apriltag_detector_create()
 
     pthread_mutex_init(&td->mutex, NULL);
 
+#ifdef _WIN32
+    QueryPerformanceFrequency((LARGE_INTEGER*)&qpc_freq);
+#endif
     td->tp = timeprofile_create();
+
+    
+    printf("%lld %lld \n", utime_now(), qpc_freq);
+    int64_t then = utime_now();
+    _sleep(1);
+    int64_t then_diff = utime_now() - then;
+    printf("%lld %lld \n", then_diff, qpc_freq);
 
     td->refine_edges = 1;
     td->decode_sharpening = 0.25;

@@ -34,8 +34,11 @@ either expressed or implied, of the Regents of The University of Michigan.
 #include <stdint.h>
 #include <inttypes.h>
 #include <ctype.h>
-#include <unistd.h>
 #include <math.h>
+
+#ifdef __linux__
+    #include <unistd.h>
+#endif
 
 #include "apriltag.h"
 #include "tag36h11.h"
@@ -115,13 +118,13 @@ int main(int argc, char *argv[])
 
     int maxiters = getopt_get_int(getopt, "iters");
 
-    const int hamm_hist_max = 10;
+#define hamm_hist_max 10
 
     for (int iter = 0; iter < maxiters; iter++) {
 
         int total_quads = 0;
         int total_hamm_hist[hamm_hist_max];
-        memset(total_hamm_hist, 0, sizeof(total_hamm_hist));
+        memset(total_hamm_hist, 0, sizeof(int)*hamm_hist_max);
         double total_time = 0;
 
         if (maxiters > 1)
