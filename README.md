@@ -1,4 +1,4 @@
-This fork was created to allow apriltag to be built on windows using pthreads4win.
+This fork was created to allow apriltag to be built on windows.
 
 AprilTag 3
 ==========
@@ -26,29 +26,47 @@ Usage
 
 Install
 =======
+Officially only linux operating systems are supported, although users have had success installing on windows too.
 
-Building on windows, CMake and NMake need to be installed.
+## Windows
+Building on windows, using visual studio's command line or its vcvarsall.bat
+The default installation will be C:\Program Files (x86)\apriltag which requires admin rights. 
+```
+cmake -B build -DCMAKE_INSTALL_PREFIX=path/to/install/apriltag
+cmake --build build --target install --config Release
+```
 
-    $ mkdir build && cd build
-    $ cmake ..
-    $ cmake --build . --config Release --target apriltag
+## Linux
+On linux, The default installation will place headers in /usr/local/include and shared library in /usr/local/lib. It also installs a pkg-config script into /usr/local/lib/pkgconfig and will install a python wrapper if python3 is installed.
 
- Officially only linux operating systems are supported, although users have had success installing on windows too.
- 
- The default installation will place headers in /usr/local/include and
-shared library in /usr/local/lib. It also installs a pkg-config script
-into /usr/local/lib/pkgconfig and will install a python wrapper if python3 is installed.
+## cmake
+If you have CMake installed, then do:
+```
+cmake -B build -DCMAKE_BUILD_TYPE=Release
+cmake --build build --target install
+```
+This will build shared (\*.so) libraries by default. If you need static (\*.a) libraries set `BUILD_SHARED_LIBS` to `OFF`:
+```
+cmake -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=OFF
+cmake --build build --target install
+```
 
-If you have CMake installed or it is not difficult to install, then do:
+If you have Ninja (`sudo apt install ninja-build`) installed, you can use:
+```
+cmake -B build -GNinja -DCMAKE_BUILD_TYPE=Release
+cmake --build build --target install
+```
+to generate and compile via the ninja build script. It will be much faster than with cmake's default Makefile generator.
 
-    $ cmake .
-    $ sudo make install
-    
+You can omit `--target install` if you only want to use this locally without installing.
+
+## make
 Otherwise, we have a handwritten makefile you can use (be warned it will do slightly different things):
+```
+make -j
+sudo make install
+```
 
-    $ make
-    $ sudo make install
-    
 To install to a different directory than /usr/local:
 
     $ PREFIX=/some/path sudo make install
@@ -67,4 +85,4 @@ You can generate your own tag families using our other repo, [AprilTag-Generatio
 
 Support
 =======
-Please create an issue on this github for any questions instead of sending a private message. This allows other people with the same question to find your answer.
+Please create an issue on this GitHub for any questions instead of sending a private message. This allows other people with the same question to find your answer.

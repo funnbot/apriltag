@@ -1,11 +1,31 @@
-cmake_minimum_required(VERSION 3.4)
-project(apriltag VERSION 3.1.0 LANGUAGES C CXX)
+cmake_minimum_required(VERSION 3.1)
+project(apriltag VERSION 3.2.0 LANGUAGES C CXX)
 
 if(POLICY CMP0077)
     cmake_policy(SET CMP0077 NEW)
 endif()
 
 option(BUILD_SHARED_LIBS "Build shared libraries" ON)
+option(ASAN "Use AddressSanitizer for debug builds to detect memory issues" OFF)
+
+if (ASAN)
+    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} \
+        -fsanitize=address \
+        -fsanitize=bool \
+        -fsanitize=bounds \
+        -fsanitize=enum \
+        -fsanitize=float-cast-overflow \
+        -fsanitize=float-divide-by-zero \
+        -fsanitize=nonnull-attribute \
+        -fsanitize=returns-nonnull-attribute \
+        -fsanitize=signed-integer-overflow \
+        -fsanitize=undefined \
+        -fsanitize=vla-bound \
+        -fno-sanitize=alignment \
+        -fsanitize=leak \
+        -fsanitize=object-size \
+    ")
+endif()
 
 # Set a default build type if none was specified
 set(default_build_type "Release")
