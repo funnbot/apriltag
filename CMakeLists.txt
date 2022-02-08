@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.1)
-project(apriltag VERSION 3.2.0 LANGUAGES C CXX)
+project(apriltag VERSION 3.2.1 LANGUAGES C CXX)
 
 if(POLICY CMP0077)
     cmake_policy(SET CMP0077 NEW)
@@ -131,10 +131,8 @@ export(TARGETS ${PROJECT_NAME}
 
 if(UNIX)
     # install pkgconfig related files
-    FILE(READ apriltag.pc.in PKGC)
-    STRING(REGEX REPLACE "^prefix=" "prefix=${CMAKE_INSTALL_PREFIX}" PKGC_CONF "${PKGC}" )
-    FILE(WRITE ${PROJECT_BINARY_DIR}/apriltag.pc ${PKGC_CONF})
-    install(FILES "${PROJECT_BINARY_DIR}/apriltag.pc" DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig/")
+    configure_file("apriltag.pc.in" "apriltag.pc" @ONLY)
+    install(FILES "${CMAKE_CURRENT_BINARY_DIR}/apriltag.pc" DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig/")
 endif(UNIX)
 
 # Python wrapper
