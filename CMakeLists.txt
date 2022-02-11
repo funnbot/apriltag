@@ -37,7 +37,7 @@ if(UNIX)
 elseif(MSVC)
     # windows will not create the .lib file unless there are symbols specifically exported
     set_target_properties(${PROJECT_NAME} PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS ON)
-endif(UNIX)
+endif()
 
 set_target_properties(${PROJECT_NAME} PROPERTIES SOVERSION 3 VERSION ${PROJECT_VERSION})
 set_target_properties(${PROJECT_NAME} PROPERTIES DEBUG_POSTFIX "d")
@@ -92,11 +92,11 @@ set(targets_export_name "${PROJECT_NAME}Targets")
 
 if(WIN32)
     # on windows, package config will be included in the install folder
-    set(config_install_dir ".")
+    set(config_install_dir "${CMAKE_INSTALL_PREFIX}")
 else()
     # install to share/apriltag/cmake/
     set(config_install_dir "${CMAKE_INSTALL_DATAROOTDIR}/${PROJECT_NAME}/cmake")
-endif(WIN32)
+endif()
 
 # Include module with function 'write_basic_package_version_file'
 include(CMakePackageConfigHelpers)
@@ -105,7 +105,7 @@ include(CMakePackageConfigHelpers)
 configure_package_config_file(
         "CMake/apriltagConfig.cmake.in"
         "${project_config}"
-        INSTALL_DESTINATION "${config_install_dir}")
+        INSTALL_DESTINATION "${CMAKE_INSTALL_PREFIX}")
 
 # Configure '<PROJECT-NAME>ConfigVersion.cmake'
 # Note: PROJECT_VERSION is used as a VERSION
@@ -117,12 +117,12 @@ install(TARGETS ${PROJECT_NAME} EXPORT ${targets_export_name}
         ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
 # install config for external projects to find_package()
-install(FILES ${project_config} ${version_config} DESTINATION "${config_install_dir}")
+install(FILES ${project_config} ${version_config} DESTINATION "${CMAKE_INSTALL_PREFIX}")
 
 # export from install/ for external projects to include()
 install(EXPORT ${targets_export_name}
     NAMESPACE apriltag::
-    DESTINATION "${config_install_dir}")
+    DESTINATION "${CMAKE_INSTALL_PREFIX}")
 
 # export from build/ for external projects to include()
 export(TARGETS ${PROJECT_NAME}
