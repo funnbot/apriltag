@@ -31,8 +31,8 @@ either expressed or implied, of the Regents of The University of Michigan.
 #include <stdint.h>
 
 #ifdef _WIN32
-#include <windows.h>
-#include <profileapi.h>
+#define WIN32_LEAN_AND_MEAN
+#include <Windows.h>
 #include <time.h>
 #else
 #include <sys/time.h>
