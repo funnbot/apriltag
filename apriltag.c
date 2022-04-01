@@ -372,13 +372,6 @@ apriltag_detector_t *apriltag_detector_create()
 #endif
     td->tp = timeprofile_create();
 
-    
-    printf("%lld %lld \n", utime_now(), qpc_freq);
-    int64_t then = utime_now();
-    _sleep(1);
-    int64_t then_diff = utime_now() - then;
-    printf("%lld %lld \n", then_diff, qpc_freq);
-
     td->refine_edges = 1;
     td->decode_sharpening = 0.25;
 
