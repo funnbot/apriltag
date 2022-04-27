@@ -31,6 +31,9 @@ either expressed or implied, of the Regents of The University of Michigan.
 #include <stdio.h>
 #include <stdlib.h>
 #ifdef _WIN32
+#define VC_EXTRALEAN
+#define WIN32_LEAN_AND_MEAN
+#define NOMINMAX
 #include <windows.h>
 #else
 #include <unistd.h>

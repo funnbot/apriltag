@@ -30,11 +30,7 @@ either expressed or implied, of the Regents of The University of Michigan.
 #include <stdbool.h>
 #include <stdint.h>
 
-#ifdef _WIN32
-#define WIN32_LEAN_AND_MEAN
-#include <Windows.h>
-#include <time.h>
-#else
+#ifndef _WIN32
 #include <sys/time.h>
 #include <unistd.h>
 #endif

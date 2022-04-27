@@ -51,6 +51,13 @@ either expressed or implied, of the Regents of The University of Michigan.
 
 #include "common/postscript_utils.h"
 
+#ifdef _WIN32
+#define VC_EXTRALEAN
+#define WIN32_LEAN_AND_MEAN
+#define NOMINMAX
+#include <Windows.h>
+#endif
+
 #ifndef M_PI
 # define M_PI 3.141592653589793238462643383279502884196
 #endif

@@ -2,6 +2,9 @@
 #define __CPTHREAD_H__
 
 #ifdef _WIN32
+#define VC_EXTRALEAN
+#define WIN32_LEAN_AND_MEAN
+#define NOMINMAX
 #include <stdbool.h>
 #include <windows.h>
 #else

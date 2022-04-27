@@ -29,6 +29,14 @@ either expressed or implied, of the Regents of The University of Michigan.
 #include <math.h>
 #include "time_util.h"
 
+#ifdef _WIN32
+#define VC_EXTRALEAN
+#define WIN32_LEAN_AND_MEAN
+#define NOMINMAX
+#include <Windows.h>
+#include <time.h>
+#endif
+
 // #ifdef _WIN32
 // typedef long long suseconds_t;
 // #endif
